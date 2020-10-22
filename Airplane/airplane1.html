@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>airplane1</title>
+
+	<style type="text/css">
+		#cosmos {
+			background-image: url("img/cosmos.jpg");
+			width: 900px;
+			height: 100vh;
+			background-size: cover;
+			background-repeat: no-repeat;
+		}
+
+		.player {
+			position: absolute;
+			width: 70px;
+			height: 75px;
+			background-image: url("img/player.png");
+		}
+
+		.enemy {
+			position: absolute;
+			width: 70px;
+			height: 75px;
+			background-image: url("img/enemy.png");
+		}
+
+	</style>
+</head>
+<body>
+	<div id="cosmos">
+		<div id="player"></div>
+		<div id="enemies"></div>
+	</div>
+
+	<script type="text/javascript">
+
+		RIGHT_LIMIT = 840, LEFT_LIMIT = 0,
+		UP_LIMIT = 0, DOWN_LIMIT = 500;
+
+		var player = {
+			"left": 500,
+			"top": 450
+		}
+
+		var enemies = [
+		                {'left':250, 'top':70},
+		                {'left':350, 'top':70},
+		                {'left':450, 'top':70},
+		                {'left':275, 'top':180},
+		                {'left':425, 'top':180},
+		                {'left':350, 'top':300}
+		              ]
+
+		/** create the players and enemies. */
+		createPlayer();
+		createEnemies();
+
+		/** draw the player and enemies. */
+		drawPlayer();
+		drawEnemies();
+
+		function createPlayer() {
+			var p = document.createElement("div");
+			p.classList.add("player");
+			document.getElementById("player").appendChild(p);
+		}
+
+		function createEnemies() {
+			enemies.forEach(function(enemy) {
+				var e = document.createElement("div");
+				e.classList.add("enemy");
+				e.style.top = enemy.top + "px";
+				e.style.left = enemy.left + "px";
+				document.getElementById("enemies").appendChild(e);
+		  });
+		}
+
+        /** Draws the player to the screen. */
+		function drawPlayer() {
+			var p = document.getElementsByClassName("player")[0];
+			p.style.top = player.top + "px";
+			p.style.left = player.left + "px";
+		}
+
+		/** Draws the array of enemies. */
+		function drawEnemies() {
+			var elms = document.getElementsByClassName("enemy");
+			for (var i = elms.length - 1; i >= 0; i--) {
+				elms[i].style.top = enemies[i].top + "px";
+				elms[i].style.left = enemies[i].left + "px";
+			}
+		}
+
+		/* Returns true iff the x, y position is not
+		   allowed to be occupied. */
+		function blocked(x, y) {
+			return x > RIGHT_LIMIT || x < LEFT_LIMIT
+			       || y > DOWN_LIMIT || y < UP_LIMIT;
+		}
+
+		/** Handle the arrow press from the user. */
+		document.onkeydown = function(e) {
+			var moveAmount = 10;
+			if (e.keyCode == 37 && !blocked(player.left - moveAmount, player.top)) {
+				// move left
+				player.left -= moveAmount;
+			}
+			else if(e.keyCode == 38 && !blocked(player.left, player.top - moveAmount)) {
+				// move up
+				player.top -= moveAmount;
+			}
+			else if(e.keyCode == 39 && !blocked(player.left + moveAmount, player.top)) {
+				// move right
+				player.left += moveAmount;
+			}
+			else if(e.keyCode == 40 && !blocked(player.left, player.top + moveAmount)) {
+				// move down
+				player.top += moveAmount;
+			}
+			drawPlayer();
+		}
+	</script>
+</body>
+</html>
