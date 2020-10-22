@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>coding Man</title>
+
+	<style type="text/css">
+		* {
+			margin: 0;
+		}
+		.wall{
+			background-color: blue;
+			height: 40px;
+			width: 40px;
+			display: inline-block;
+		}
+
+		.wall2{
+			background-color: brown;
+			height: 40px;
+			width: 40px;
+			display: inline-block;
+		}
+
+		.row {
+			line-height: 0;
+		}
+
+		.blank {
+			background-color: black;
+			height: 40px;
+			width: 40px;
+			display: inline-block;
+		}
+
+		.sushi {
+			background-color: black;
+			background-image: url('img2/sushi.png');
+			background-size: contain;
+			height: 40px;
+			width: 40px;
+			display: inline-block;
+		}
+
+		.onigiri {
+			background-color: black;
+			background-image: url('img2/onigiri.png');
+			background-size: contain;
+			height: 40px;
+			width: 40px;
+			display: inline-block;
+		}
+
+		.ninjaMan {
+			height: 40px;
+			width: 40px;
+			background-color: black;
+			background-image: url("img2/ninja.gif");
+			background-size: contain;
+			display: inline-block;
+			position: absolute;
+		}
+
+		.ghost {
+			height: 40px;
+			width: 40px;
+			background-color: black;
+			background-image: url("img2/red.gif");
+			background-size: contain;
+			display: inline-block;
+			position: absolute;			
+		}
+	</style>
+</head>
+<body>
+	<div id="world"></div>
+	<div id="ninja" class="ninjaMan"></div>
+	<div id="ghost" class="ghost"></div>
+
+	<script type="text/javascript">
+
+		//////////  INITIALIZATION BLOCK  ////////////
+		SIZE = 40; // PIXEL SIZE OF EACH SQUARE.
+		WALL = 0, SUSHI = 1, BLANK = 2, ONIGIRI = 3, BORDER = 4;
+		ROWS = 10, COLUMNS = 10;
+		var score = 0, sushiPower = 10, onigiriPower = 5;
+		var world=[];
+		generateWorld(ROWS,COLUMNS);
+		N = world.length;
+		var worldDict = {0:"wall", 1:"sushi", 2:"blank", 3:"onigiri", 4:"wall2"};
+		var ninjaBox = {x:2, y:3};
+		var ghostPos = {x:1, y:1};
+		////////////////////////////////////////////////
+
+        /** Draws the world from the world array.*/
+		function drawWorld() {
+			var txt="";
+			world.forEach(function(row){
+				txt += "<div class='row'>";
+				for(var i = 0; i < row.length; ++i) {
+					txt+= "<div class='"+worldDict[row[i]]+"'></div>";
+				}
+				txt += "</div>";
+			});
+			document.getElementById("world").innerHTML = txt;
+	      }
+
+	     drawWorld();
+
+	    /* Returns true iff the place is blocked
+	       for the given row and column.
+	       	(i.e. ninjaman cannot go to this spot.) */
+	    function blockedPlace(row, col) {
+	    	return world[row][col] == WALL ||
+	    	       world[row][col] == BORDER;
+	    }
+
+        /** handles the keypress of the user.
+          (makes changes in ninjaman's position). */
+    	document.onkeydown = function(e) {
+    		if (e.keyCode == 40 && !blockedPlace(ninjaBox.y+1, ninjaBox.x)) {
+              // DOWN
+              ninjaBox.y++;
+            }
+            else if(e.keyCode == 38 && !blockedPlace(ninjaBox.y-1, ninjaBox.x)) {
+              // UP
+              ninjaBox.y--;
+            }
+            else if(e.keyCode == 37 && !blockedPlace(ninjaBox.y, ninjaBox.x-1)) {
+              // LEFT
+              ninjaBox.x--;
+            }
+            else if(e.keyCode == 39 && !blockedPlace(ninjaBox.y, ninjaBox.x+1)) {
+              // RIGHT
+              ninjaBox.x++;    
+            }
+          drawNinja();
+        }
+
+        /** Draws the place of the ninja. */
+	    function drawNinja() {
+	    	var ninja = document.getElementById("ninja");
+	    	if (world[ninjaBox.y][ninjaBox.x] == SUSHI) {
+	    		// eat the sushi
+	    		score += sushiPower;
+	    		world[ninjaBox.y][ninjaBox.x] = BLANK;
+	    		drawWorld();
+	    	} else if (world[ninjaBox.y][ninjaBox.x] == ONIGIRI) {
+	    		// eat the onigiri
+	    		score += onigiriPower;
+	    		world[ninjaBox.y][ninjaBox.x] = BLANK;
+	    		drawWorld();
+	    	}
+	    	ninja.style.top = SIZE * ninjaBox.y +"px";
+	    	ninja.style.left = SIZE * ninjaBox.x +"px";
+	    }
+
+	    function defaultMove(gPos) {
+	    	if (!blockedPlace(gPos.y + 1, gPos.x)) {
+	    		gPos.y++;
+	    	}
+	    	else if(!blockedPlace(gPos.y - 1, gPos.x)) {
+	    		gPos.y--;
+	    	}
+	    	else if(!blockedPlace(gPos.y, gPos.x+1)) {
+	    		gPos.x++;
+	    	}
+	    	else {
+	    		gPos.x--;
+	    	}
+	    }
+
+	    function moveGhost() {
+	    	var y = ghostPos.y, x = ghostPos.x;
+
+	    	if (ninjaBox.y < ghostPos.y && !blockedPlace(y-1, x)) {
+	    		y = ghostPos.y - 1;
+	    	}
+	    	else if (ninjaBox.y > ghostPos.y && !blockedPlace(y+1, x)) {
+	    		y = ghostPos.y + 1;
+	    	}
+	    	else if (ninjaBox.x < ghostPos.x && !blockedPlace(y, x-1)) {
+	    		x = ghostPos.x - 1;
+	    	}
+	    	else if (ninjaBox.x > ghostPos.x && !blockedPlace(y, x + 1)) {
+	    		x = ghostPos.x + 1;
+	    	}
+
+	    	if(!blockedPlace(y, x)) {
+	    		ghostPos.x = x;
+	    		ghostPos.y = y;
+	    	} else {
+	    		defaultMove(ghostPos);
+	    	}
+	    }
+
+	    /** Draws the place of the ghost. */
+	    function drawGhost() {
+	    	var ghost = document.getElementById("ghost");
+	    	// if (world[ninjaBox.y][ninjaBox.x] == SUSHI) {
+	    	// 	// eat the sushi
+	    	// 	score += sushiPower;
+	    	// 	world[ninjaBox.y][ninjaBox.x] = BLANK;
+	    	// 	drawWorld();
+	    	// } else if (world[ninjaBox.y][ninjaBox.x] == ONIGIRI) {
+	    	// 	// eat the onigiri
+	    	// 	score += onigiriPower;
+	    	// 	world[ninjaBox.y][ninjaBox.x] = BLANK;
+	    	// 	drawWorld();
+	    	// }
+	    	moveGhost();
+	    	ghost.style.top = SIZE * ghostPos.y +"px";
+	    	ghost.style.left = SIZE * ghostPos.x +"px";
+	    }
+
+	    setInterval(drawGhost, 1000);
+
+        /** Returns random places to help generate the world. 
+            (Helper for generateWorld() ). */
+	    function getPlace() {
+		   var p = Math.random(1);
+		   if (p < 0.3) {
+		       return WALL;
+		   }
+		   else if(p < 0.4) {
+		   	   return SUSHI;
+		   } 
+		   else if(p < 0.5) {
+		   	   return ONIGIRI;
+		   }
+		   else {
+		   	   return BLANK;
+		   }	    	
+	    }
+
+	    /* Generates a random world by changing the values
+	       in world array. */
+	    function generateWorld(rows, col) {
+	    	for (var r = 0; r < rows; ++r) {
+	    		var entry = [];
+	    		for (var c = 0; c < col; ++c) {
+	    			if (r == 0 || c == 0 || c == col-1 || r == rows-1) {
+	    				entry.push(BORDER);
+	    			}
+	    			else {
+	    				entry.push(getPlace());
+	    			}
+	    		}
+	    		world.push(entry);
+	    	}
+	    }
+
+
+	    
+	</script>
+</body>
+</html>

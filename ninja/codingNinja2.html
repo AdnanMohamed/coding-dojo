@@ -1,0 +1,57 @@
+<html>
+<body>
+	<div id='background'>
+        <div id='character' style='position:absolute; top:100px; left:450px; background-image: url("img/down1.png"); width:59px; height:86px;'></div>
+    </div>
+    <script type="text/javascript">
+        var t = 100, left = 450;
+        var leftLimit = 0, rightLimit = 500;
+        var upLimit = 0, downLimit = 500;
+        var direction = "down", leg = 1;
+        var ninja = document.getElementById("character");
+
+        function update() {
+            ninja.style.top = t + "px";
+            ninja.style.left = left + "px";
+            ninja.style.background = "url('img/"+direction+leg+".png')";
+        }
+
+        function changeLeg() {
+            if (leg == 1) {
+              leg++;
+            }
+            else {
+              leg--;
+            }
+        }
+
+        document.onkeydown = function(e) {
+            if (e.keyCode == 40 && t + 10 <= downLimit) {
+                // DOWN
+                t += 10;
+                direction = "down";
+                changeLeg();
+            }
+            else if(e.keyCode == 38 && t - 10 >= upLimit) {
+                // UP
+                t -= 10;
+                direction = "top";
+                changeLeg();
+            }
+            else if(e.keyCode == 37 && leftLimit <= left - 10) {
+                // LEFT
+                left -= 10;
+                direction = "left";
+                changeLeg();
+            }
+            else if(e.keyCode == 39 && rightLimit >= left + 10) {
+                // RIGHT    
+                left += 10;
+                direction = "right";
+                changeLeg();
+            }
+            update();
+        }
+    </script>
+</body>
+</html>
