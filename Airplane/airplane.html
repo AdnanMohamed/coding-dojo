@@ -26,12 +26,20 @@
 			background-image: url("img/enemy.png");
 		}
 
+		.missle {
+			position: absolute;
+			width: 2px;
+			height: 10px;
+			background-color: orange;
+		}
+
 	</style>
 </head>
 <body>
 	<div id="cosmos">
 		<div id="player"></div>
 		<div id="enemies"></div>
+		<div id="missles"></div>
 	</div>
 
 	<script type="text/javascript">
@@ -42,24 +50,14 @@
 		var player = {
 			"left": 500,
 			"top": 450
-		}
+		};
 
-		var enemies = [
-		                {'left':250, 'top':70},
-		                {'left':350, 'top':70},
-		                {'left':450, 'top':70},
-		                {'left':275, 'top':180},
-		                {'left':425, 'top':180},
-		                {'left':350, 'top':300}
-		              ]
+		var enemies = [];
 
+		var missles = [];
 		/** create the players and enemies. */
 		createPlayer();
-		createEnemies();
-
-		/** draw the player and enemies. */
-		drawPlayer();
-		drawEnemies();
+		createEnemies(5);
 
 		function createPlayer() {
 			var p = document.createElement("div");
@@ -67,14 +65,27 @@
 			document.getElementById("player").appendChild(p);
 		}
 
-		function createEnemies() {
-			enemies.forEach(function(enemy) {
-				var e = document.createElement("div");
-				e.classList.add("enemy");
-				e.style.top = enemy.top + "px";
-				e.style.left = enemy.left + "px";
-				document.getElementById("enemies").appendChild(e);
-		  });
+		function createEnemy() {
+			var y = Math.floor(Math.random() * 100) + 70;  // top random position
+			var x = Math.floor(Math.random() * 450) + 100; // horizantal random position.
+			var e = document.createElement("div");
+			e.classList.add("enemy");
+			document.getElementById("enemies").appendChild(e);
+			enemies.push({'left':x, 'top':y})	
+		}
+
+		function createEnemies(N) {
+			for (var i = 0; i < N; ++i) {
+				createEnemy();
+			}
+			setTimeout(createEnemies, 7000, 2);
+		}
+
+		function createMissle() {
+			var m = document.createElement("div");
+			m.classList.add("missle");
+			document.getElementById("missles").appendChild(m);	
+			missles.push({'left':player.left + 33, 'top':player.top - 8});		
 		}
 
         /** Draws the player to the screen. */
@@ -90,6 +101,14 @@
 			for (var i = elms.length - 1; i >= 0; i--) {
 				elms[i].style.top = enemies[i].top + "px";
 				elms[i].style.left = enemies[i].left + "px";
+			}
+		}
+
+		function drawMissles () {
+			var mizls = document.getElementsByClassName("missle");
+			for (var i = mizls.length - 1; i >= 0; i--) {
+				mizls[i].style.top = missles[i].top + "px";
+				mizls[i].style.left = missles[i].left + "px";
 			}
 		}
 
@@ -119,8 +138,41 @@
 				// move down
 				player.top += moveAmount;
 			}
+			else if(e.keyCode == 32) {
+				// fire!
+				createMissle();
+			}
 			drawPlayer();
+			drawMissles();
 		}
+
+        /* Moves the enemies down.
+           Helper used in the gameLoop. */
+		function moveEnemies() {
+			enemies.forEach(function(enemy) {
+			  if (enemy.top + 5 <= 530)
+				 enemy.top += 5;
+			});
+		}
+
+		/* Moves the enemies down.
+           Helper used in the gameLoop. */
+		function moveMissles() {
+			missles.forEach(function(missle) {
+				missle.top -= 10;
+			});
+		}
+
+		function gameLoop() {
+			drawPlayer();
+			moveEnemies();
+			drawEnemies();
+			moveMissles();
+			drawMissles();
+			setTimeout(gameLoop, 100);
+		}
+		gameLoop();
+
 	</script>
 </body>
 </html>
